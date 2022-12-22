@@ -1,7 +1,7 @@
 import UIKit
 class TodoListViewController: UITableViewController {
     let userDefaults = UserDefaults.standard
-    var itemList = ["Buy apples", "Buy bananas", "Buy oranges"]
+    var itemList = [Item]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -14,18 +14,19 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        cell.textLabel?.text = itemList[indexPath.row]
+        let item = itemList[indexPath.row]
+        cell.textLabel?.text = item.title
+        cell.accessoryType = item.done ? .checkmark : .none
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+      
+        itemList[indexPath.row].done = !itemList[indexPath.row].done
+        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    
     //MARK - ADD NEW ITEMS
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         var textfield = UITextField()
@@ -34,7 +35,9 @@ class TodoListViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             if let item = textfield.text {
-                self.itemList.append(item)
+                let newItem = Item()
+                newItem.title = item
+                self.itemList.append(newItem)
                 self.userDefaults.setValue(self.itemList, forKey: "ToDoListArray")
                 self.tableView.reloadData()
             }
@@ -48,9 +51,12 @@ class TodoListViewController: UITableViewController {
     }
     
     func loadArray() {
-        if let safeItemList = userDefaults.array(forKey: "ToDoListArray") as? [String] {
-            itemList = safeItemList
-        }
+        let newItem = Item()
+        newItem.title = "Buy Apples"
+        itemList.append(newItem)
+//        if let safeItemList = userDefaults.array(forKey: "ToDoListArray") as? [String] {
+//            itemList = safeItemList
+//        }
     }
     
 }
