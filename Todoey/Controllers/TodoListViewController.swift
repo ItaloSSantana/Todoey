@@ -2,12 +2,12 @@ import UIKit
 import CoreData
 class TodoListViewController: UITableViewController {
     var itemList = [Item]()
-    let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-       // loadItems()
+        loadItems()
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -37,16 +37,15 @@ class TodoListViewController: UITableViewController {
 
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             if let item = textfield.text {
-                if let safeContext = self.context {
-                let newItem = Item(context: safeContext)
+                let newItem = Item(context: self.context)
 
                 newItem.title = item
                 newItem.done = false
                 self.itemList.append(newItem)
                 self.saveItems()
-                }
             }
-        }
+            }
+        
         alert.addTextField { (alertTextfield) in
             alertTextfield.placeholder = "Create new Item"
             textfield = alertTextfield
@@ -55,25 +54,20 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
 
-//    func loadItems() {
-//        if let safeDataFile = dataFilePath{
-//            let data = try? Data(contentsOf: safeDataFile)
-//            let decoder = PropertyListDecoder()
-//            do {
-//                guard let safeData = data else {return}
-//                itemList = try decoder.decode([Item].self, from: safeData)
-//            } catch {
-//                print("Error decoding")
-//            }
-//        }
-//    }
-
+    func loadItems() {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+            do {
+           itemList = try context.fetch(request)
+            } catch {
+                print("error fetching data from context")
+            }
+        }
+    
     func saveItems() {
         do {
-            if let safeContext = context {
-                 try safeContext.save()
+            try context.save()
                 print("saving...")
-            }
+            
         } catch {
             print("Error saving context")
         }
