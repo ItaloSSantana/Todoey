@@ -55,11 +55,9 @@ class CategoryViewController: UITableViewController {
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
     }
-}
 
-//MARK: - TableView Delegates/Data Source
+//MARK: - TableView Data Source
 
-extension CategoryViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return categories.count
     }
@@ -70,8 +68,19 @@ extension CategoryViewController {
         cell.textLabel?.text = category.name
         return cell
     }
+  
+    
+//MARK: - TableView Delegates
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "goToItems", sender: self)
+        performSegue(withIdentifier: "GoToItems", sender: self)
     }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let destinationVC = segue.destination as? TodoListViewController
+        
+        if let indexPath = tableView.indexPathForSelectedRow {
+            destinationVC?.selectedCategory = categories[indexPath.row]
+        }
+    }
+    
 }

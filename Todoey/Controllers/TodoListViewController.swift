@@ -2,17 +2,32 @@ import UIKit
 import CoreData
 class TodoListViewController: UITableViewController {
     @IBOutlet weak var searchBar: UISearchBar!
-    
     var itemList = [Item]()
+    
+    var selectedCategory: Category? {
+        didSet{
+            loadItems()
+        }
+    }
+    
     let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
         searchBar.delegate = self
-        loadItems()
     }
     
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()){
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil){
+        
+        if let selectedName = selectedCategory?.name {
+            let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedName)
+        
+            if let additionalPredicate = predicate {
+                request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [additionalPredicate, categoryPredicate])
+            } else {
+                request.predicate = categoryPredicate
+            }
+          
         do {
             if let safeContext = context {
                 itemList = try safeContext.fetch(request)
@@ -22,7 +37,7 @@ class TodoListViewController: UITableViewController {
         }
         tableView.reloadData()
     }
-    
+    }
     func saveItems() {
         do {
             if let safeContext = context {
@@ -46,6 +61,7 @@ class TodoListViewController: UITableViewController {
                     let newItem = Item(context: safeContext)
                     newItem.title = item
                     newItem.done = false
+                    newItem.parentCategory = self.selectedCategory
                     self.itemList.append(newItem)
                     self.saveItems()
                 }
@@ -65,9 +81,9 @@ extension TodoListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let safeText = searchBar.text {
             let request: NSFetchRequest<Item> = Item.fetchRequest()
-            request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", safeText)
+            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", safeText)
             request.sortDescriptors  = [NSSortDescriptor(key: "title", ascending: true)]
-            loadItems(with: request)
+            loadItems(with: request, predicate: predicate)
         }
     }
     
