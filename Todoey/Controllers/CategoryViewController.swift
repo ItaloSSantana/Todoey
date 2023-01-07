@@ -7,8 +7,8 @@ class CategoryViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadCategory()
         print(Realm.Configuration.defaultConfiguration.fileURL)
+        loadCategory()
     }
 
     func loadCategory(){

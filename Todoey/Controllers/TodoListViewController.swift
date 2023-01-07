@@ -14,7 +14,7 @@ class TodoListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-      //  searchBar.delegate = self
+        searchBar.delegate = self
     }
     
     func loadItems(){
@@ -35,7 +35,7 @@ class TodoListViewController: UITableViewController {
                     if let item = textfield.text {
                         let newItem = Item()
                         newItem.title = item
-                        print(newItem.creation)
+                        newItem.dateCreated = Date()
                         if let currentCategory = self.selectedCategory {
                             currentCategory.items.append(newItem)
                         }
@@ -54,24 +54,25 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
 }
-////MARK: - Search Bar Methods
-//
-//extension TodoListViewController: UISearchBarDelegate {
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        if let safeText = searchBar.text {
-//            //itemList = itemList?.filter("title CONTAINS[cd] %@", safeText).sorted(byKeyPath: "title", ascending: true)
-//        }
-//    }
-//
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        if searchBar.text?.count == 0 {
-//            loadItems()
-//            DispatchQueue.main.async {
-//                searchBar.resignFirstResponder()
-//            }
-//        }
-//    }
-//}
+//MARK: - Search Bar Methods
+
+extension TodoListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if let safeText = searchBar.text {
+            itemList = itemList?.filter("title CONTAINS[cd] %@", safeText).sorted(byKeyPath: "dateCreated", ascending: true)
+            tableView.reloadData()
+        }
+    }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
+}
 
 //MARK: - TableView Delegate/DataSource
 
