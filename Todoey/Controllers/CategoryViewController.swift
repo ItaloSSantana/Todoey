@@ -1,12 +1,13 @@
 import UIKit
 import RealmSwift
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
     let realm = try? Realm()
     var categories: Results<Category>?
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = 80.0
         print(Realm.Configuration.defaultConfiguration.fileURL)
         loadCategory()
     }
@@ -27,9 +28,22 @@ class CategoryViewController: UITableViewController {
         } catch {
             print("Error saving context")
         }
-
     }
 
+    //DELETE DATA FROM SWIPE
+    
+    override func updateModel(at indexPath: IndexPath){
+        if let categoriesToDelete = self.categories?[indexPath.row] {
+            do {
+                try self.realm?.write {
+                    self.realm?.delete(categoriesToDelete)
+                }
+            } catch {
+                print(error)
+            }
+        }
+    }
+    
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         var textfield = UITextField()
 
@@ -58,12 +72,10 @@ class CategoryViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let cell = super.tableView(tableView,cellForRowAt: indexPath)
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Category Added Yet"
-
         return cell
     }
-
 
 //MARK: - TableView Delegates
 
